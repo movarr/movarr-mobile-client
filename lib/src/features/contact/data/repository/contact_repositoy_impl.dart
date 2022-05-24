@@ -1,5 +1,5 @@
+import 'package:movarr/src/features/contact/data/services/contacts_service.dart';
 import 'package:movarr/src/features/contact/domain/contact_repository.dart';
-import 'package:movarr/src/features/contact/services/contacts_service.dart';
 
 class ContactRepositoryImpl implements ContactRepository {
   late ContactsService _contactsService;
