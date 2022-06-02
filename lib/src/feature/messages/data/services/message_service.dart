@@ -1,9 +1,12 @@
 import 'package:android_content_provider/android_content_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:movarr/src/feature/messages/data/models/messages_model.dart';
 
 class MessageServices {
   final String smsInboxUri = 'content://sms/inbox';
   late final AndroidContentResolver contentResolver;
+  static const platform = MethodChannel("movarr.channel");
   MessageServices() {
     contentResolver = AndroidContentResolver.instance;
   }
@@ -70,7 +73,74 @@ class MessageServices {
     for (int i = 0; i < batch.length; ++i) {
       messages.add(Message.fromList(batch[i]));
     }
-
     return messages;
+  }
+
+  Future<int> restoreMessage(Message message) async {
+    final contentValues = ContentValues()
+      ..putString(
+        'address',
+        'GT',
+      )
+      ..putInt('person', message.person)
+      ..putString('date', message.date.toString())
+      ..putInt('date_sent', message.date_sent)
+      ..putInt(
+        'protocol',
+        message.protocol,
+      )
+      ..putInt(
+        'read',
+        message.read,
+      )
+      ..putInt(
+        'status',
+        message.status,
+      )
+      ..putInt(
+        'type',
+        message.type,
+      )
+      ..putInt(
+        'reply_path_present',
+        message.reply_path_present,
+      )
+      ..putString(
+        'subject',
+        message.subject,
+      )
+      ..putString(
+        'body',
+        message.body,
+      )
+      ..putString(
+        'service_center',
+        message.service_center,
+      )
+      ..putInt('seen', message.seen);
+    final result = await contentResolver.insert(
+        uri: 'content://sms', values: contentValues);
+    return int.parse(result!.split('/').last);
+  }
+
+  Future<bool> isDefaultMessagingApp() async {
+    late final bool isDefault;
+    try {
+      isDefault =
+          (await platform.invokeMethod("isDefaultMessagingApp")) as bool;
+      if (kDebugMode) print(isDefault);
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return isDefault;
+  }
+
+  Future<void> requestForDefaultMessagingApp() async {
+    try {
+      await platform.invokeMethod("requestForDefaultMessagingApp");
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return;
   }
 }
