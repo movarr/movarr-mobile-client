@@ -1,9 +1,13 @@
 import 'package:android_content_provider/android_content_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:movarr/src/feature/messages/data/models/messages_model.dart';
 
 class MessageServices {
   final String smsInboxUri = 'content://sms/inbox';
   late final AndroidContentResolver contentResolver;
+  static const platform = MethodChannel("movarr.channel");
+
   MessageServices() {
     contentResolver = AndroidContentResolver.instance;
   }
@@ -119,5 +123,26 @@ class MessageServices {
     final result = await contentResolver.insert(
         uri: 'content://sms', values: contentValues);
     return int.parse(result!.split('/').last);
+  }
+
+  Future<bool> isDefaultMessagingApp() async {
+    late final bool isDefault;
+    try {
+      isDefault =
+          (await platform.invokeMethod("isDefaultMessagingApp")) as bool;
+      if (kDebugMode) print(isDefault);
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return isDefault;
+  }
+
+  Future<void> requestForDefaultMessagingApp() async {
+    try {
+      await platform.invokeMethod("requestForDefaultMessagingApp");
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return;
   }
 }
