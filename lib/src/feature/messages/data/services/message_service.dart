@@ -73,4 +73,51 @@ class MessageServices {
 
     return messages;
   }
+
+  Future<int> restoreMessage(Message message) async {
+    final contentValues = ContentValues()
+      ..putString(
+        'address',
+        'GT',
+      )
+      ..putInt('person', message.person)
+      ..putString('date', message.date.toString())
+      ..putInt('date_sent', message.date_sent)
+      ..putInt(
+        'protocol',
+        message.protocol,
+      )
+      ..putInt(
+        'read',
+        message.read,
+      )
+      ..putInt(
+        'status',
+        message.status,
+      )
+      ..putInt(
+        'type',
+        message.type,
+      )
+      ..putInt(
+        'reply_path_present',
+        message.reply_path_present,
+      )
+      ..putString(
+        'subject',
+        message.subject,
+      )
+      ..putString(
+        'body',
+        message.body,
+      )
+      ..putString(
+        'service_center',
+        message.service_center,
+      )
+      ..putInt('seen', message.seen);
+    final result = await contentResolver.insert(
+        uri: 'content://sms', values: contentValues);
+    return int.parse(result!.split('/').last);
+  }
 }
