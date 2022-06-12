@@ -1,11 +1,14 @@
 package com.example.movarr
 
+import android.Manifest
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Telephony
 import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -14,6 +17,7 @@ class MainActivity : FlutterActivity() {
 
     private val CHANNEL = "movarr.channel"
     private val MAKE_DEFAULT_APP_REQUEST = 1
+
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
@@ -27,6 +31,16 @@ class MainActivity : FlutterActivity() {
                 call.method.equals("requestForDefaultMessagingApp") -> {
                     requestForDefaultMessagingApp()
                     result.success(true)
+                }
+                call.method.equals("requestForMessagingPermissions") -> {
+                    var permissions: Array<String> = arrayOf(Manifest.permission.READ_SMS)
+                    var requestCode: Int = 100
+                    requestForPermissions(permissions, requestCode)
+                    result.success(true)
+                }
+                call.method.equals("checkForMessagingPermissions") -> {
+                    var isGranted: Boolean = checkForPermissions(Manifest.permission.READ_SMS)
+                    result.success(isGranted)
                 }
                 else -> result.notImplemented()
             }
@@ -65,5 +79,13 @@ class MainActivity : FlutterActivity() {
                 return false
             }
         }
+    }
+
+    private fun requestForPermissions(permissions: Array<String>, requestCode: Int) {
+        ActivityCompat.requestPermissions(this, permissions, requestCode)
+    }
+    private fun checkForPermissions(permission: String): Boolean {
+        return ActivityCompat.checkSelfPermission(this, permission) ==
+                PackageManager.PERMISSION_GRANTED
     }
 }

@@ -136,10 +136,29 @@ class MessageServices {
     }
     return isDefault;
   }
-
+Future<bool> istMessagingPermissionsGranted() async {
+    late final bool isDefault;
+    try {
+      isDefault =
+          (await platform.invokeMethod("checkForMessagingPermissions")) as bool;
+      if (kDebugMode) print(isDefault);
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return isDefault;
+  }
   Future<void> requestForDefaultMessagingApp() async {
     try {
       await platform.invokeMethod("requestForDefaultMessagingApp");
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    return;
+  }
+
+  Future<void> requestForMessagingPermissions() async {
+    try {
+      await platform.invokeMethod("requestForMessagingPermissions");
     } catch (e) {
       if (kDebugMode) print(e);
     }
